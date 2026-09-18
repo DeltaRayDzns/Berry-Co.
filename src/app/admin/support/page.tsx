@@ -114,19 +114,35 @@ export default function AdminSupportPage() {
           <p className="text-sm text-stone-500">Review tickets and reply to customers from the admin dashboard.</p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => void loadTickets()}
-            className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-700 hover:border-stone-300"
-          >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </button>
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#f3c4bc] bg-[#fff1ee] px-3 py-2 text-sm font-medium text-[#c23f32]">
+        <button
+          type="button"
+          onClick={() => void loadTickets()}
+          className="inline-flex items-center gap-2 self-start rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-700 hover:border-stone-300 sm:self-center"
+        >
+          <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+          Refresh
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-sm font-medium text-stone-500">
             <MessageSquareText size={16} />
-            {tickets.length} Ticket{tickets.length === 1 ? '' : 's'}
+            Total Tickets
           </div>
+          <p className="mt-2 text-2xl font-bold text-stone-900">{tickets.length}</p>
+        </div>
+        <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+          <p className="text-sm font-medium text-stone-500">Open</p>
+          <p className="mt-2 text-2xl font-bold text-stone-900">0</p>
+        </div>
+        <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+          <p className="text-sm font-medium text-stone-500">Pending</p>
+          <p className="mt-2 text-2xl font-bold text-stone-900">0</p>
+        </div>
+        <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+          <p className="text-sm font-medium text-stone-500">Resolved</p>
+          <p className="mt-2 text-2xl font-bold text-stone-900">0</p>
         </div>
       </div>
 
@@ -156,22 +172,30 @@ export default function AdminSupportPage() {
                   type="button"
                   onClick={() => setSelectedTicketId(ticket.id)}
                   className={`w-full rounded-xl border p-4 text-left transition ${
-                    active ? 'border-[#d9483a] bg-[#fff4f2]' : 'border-stone-200 bg-[#fcfaf7] hover:border-[#d9483a]/50'
+                    active ? 'border-transparent bg-brand text-white' : 'border-stone-200 bg-[#fcfaf7] hover:border-[#d9483a]/50'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-stone-500">{ticket.ticket_number}</span>
-                    <span className="rounded-full bg-[#fbe3df] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#c23f32]">
+                    <span className={`text-xs font-bold ${active ? 'text-white/80' : 'text-stone-500'}`}>
+                      {ticket.ticket_number}
+                    </span>
+                    <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                      active ? 'bg-white text-brand' : 'bg-[#fbe3df] text-[#c23f32]'
+                    }`}>
                       {ticket.status}
                     </span>
                   </div>
 
-                  <h2 className="mt-3 text-base font-bold text-stone-900">{ticket.subject}</h2>
-                  <p className="mt-2 text-xs text-stone-500">{ticket.customer_name} • {ticket.customer_email}</p>
-                  <p className="mt-2 text-xs text-stone-500">
+                  <h2 className={`mt-3 text-base font-bold ${active ? 'text-white' : 'text-stone-900'}`}>
+                    {ticket.subject}
+                  </h2>
+                  <p className={`mt-2 text-xs ${active ? 'text-white/85' : 'text-stone-500'}`}>
+                    {ticket.customer_name} • {ticket.customer_email}
+                  </p>
+                  <p className={`mt-2 text-xs ${active ? 'text-white/85' : 'text-stone-500'}`}>
                     {ticket.category} {ticket.order_number ? `• Order #${ticket.order_number}` : ''}
                   </p>
-                  <p className="mt-3 text-sm text-stone-700">{ticket.message}</p>
+                  <p className={`mt-3 text-sm ${active ? 'text-white/90' : 'text-stone-700'}`}>{ticket.message}</p>
                 </button>
               )
             })
