@@ -46,7 +46,7 @@ export default function ProductAccordions({
 
   const specRows = [
     { label: "Series", value: seriesName },
-    { label: "Specifications", value: specifications },
+    { label: "Specifications", value: specifications?.trim() || null },
     { label: "Manufacturer", value: brandName },
     { label: "Category", value: categoryName },
   ].filter((row) => Boolean(row.value));

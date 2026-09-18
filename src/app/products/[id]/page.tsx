@@ -20,7 +20,30 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const reviews = await getProductReviews(product.id);
   const initialInWishlist = session ? await isProductWishlisted(session.userId, product.id) : false;
 
-  const status = product.status === 'out_of_stock' ? 'Out of Stock' : 'In Stock';
+  const hasPreOrderDates = Boolean(product.preorder_start_date || product.preorder_end_date)
+  const hasPreOrderTag = (product.tags ?? []).some((tag) => tag.toLowerCase().includes('pre-order'))
+  const isPreOrderProduct = hasPreOrderDates || hasPreOrderTag
+
+  const formatPreOrderPeriod = () => {
+    if (!product.preorder_start_date && !product.preorder_end_date) {
+      return 'Pre-order window now open.'
+    }
+
+    const formatDate = (value: string | null) => {
+      if (!value) return 'TBD'
+      return new Date(value).toLocaleDateString('en-PH', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    }
+
+    const start = formatDate(product.preorder_start_date)
+    const end = formatDate(product.preorder_end_date)
+    return start === end ? `${start}` : `${start} – ${end}`
+  }
+
+  const status = isPreOrderProduct ? 'Pre-orders Open' : product.status === 'out_of_stock' ? 'Out of Stock' : 'In Stock';
   const productDescription =
     product.description?.trim() ||
     `${product.name} is part of the Berry Co. collection and brings premium detail, collectible quality, and standout design to fans and collectors alike.`;
@@ -89,7 +112,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
               name={product.name}
               price={`₱${Number(product.price).toLocaleString('en-PH')}`}
               status={status}
-              tag={product.category_name ?? 'Berry Co.'}
+              tag={isPreOrderProduct ? 'Pre-Order' : product.category_name ?? 'Berry Co.'}
+              preorderPeriod={formatPreOrderPeriod()}
               initialInWishlist={initialInWishlist}
             />
           </div>

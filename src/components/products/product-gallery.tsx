@@ -1,16 +1,40 @@
 type ProductGalleryProps = {
   name: string;
   imageUrl: string | null;
-  images?: string[] | null;
+  images?: string[] | string | null;
 };
 
+function normalizeGalleryImages(value: string[] | string | null | undefined): string[] {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => String(entry).trim())
+      .filter(Boolean);
+  }
+
+  const text = String(value).trim();
+  if (!text) return [];
+
+  try {
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed)) {
+      return parsed.map((entry) => String(entry).trim()).filter(Boolean);
+    }
+  } catch {
+    // Ignore malformed JSON and fall back to newline/comma parsing.
+  }
+
+  return text
+    .split(/[\r\n,]+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
 export default function ProductGallery({ name, imageUrl, images }: ProductGalleryProps) {
-  // Prefer the gallery array if populated, otherwise fallback to the primary cover image
-  const gallery = images && images.length > 0 
-    ? images 
-    : imageUrl 
-    ? [imageUrl] 
-    : [];
+  const gallery = normalizeGalleryImages(images).length > 0
+    ? normalizeGalleryImages(images)
+    : normalizeGalleryImages(imageUrl);
 
   if (gallery.length === 0) {
     return (

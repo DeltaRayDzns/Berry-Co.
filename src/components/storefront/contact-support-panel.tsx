@@ -74,9 +74,14 @@ export default function ContactSupportPanel({
     const query = email ? `?email=${encodeURIComponent(email)}` : ''
     const response = await fetch(`/api/support-tickets${query}`)
     const data = await response.json()
-    if (response.ok && data.tickets.length > 0) {
-      setTickets(data.tickets.map((ticket: Omit<Ticket, 'messages'>) => ({ ...ticket, messages: [] })))
-      setSelectedTicketId(data.tickets[0].id)
+    if (response.ok) {
+      if (data.tickets.length > 0) {
+        setTickets(data.tickets)
+        setSelectedTicketId(data.tickets[0].id)
+      } else {
+        setTickets([])
+        setSelectedTicketId('')
+      }
     }
     if (!response.ok) setTrackMessage(data.error ?? 'Unable to load tickets.')
     setLoading(false)
@@ -107,9 +112,31 @@ export default function ContactSupportPanel({
       return
     }
     setSubmitted(true)
-    const newTicket = { ...data.ticket, messages: [] }
+    const newTicket = { ...data.ticket, messages: data.ticket.messages ?? [] }
     setTickets((current) => [newTicket, ...current])
     setSelectedTicketId(newTicket.id)
+  }
+
+  async function handleTicketReply() {
+    if (!selectedTicketId || !user) return
+
+    const replyText = trackMessage.trim()
+    if (!replyText) return
+
+    const response = await fetch('/api/support-tickets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticketId: selectedTicketId, message: replyText }),
+    })
+    const data = await response.json()
+
+    if (!response.ok) {
+      setTrackMessage(data.error ?? 'Unable to send your reply.')
+      return
+    }
+
+    setTrackMessage('')
+    await loadTickets()
   }
 
   return (
@@ -150,7 +177,7 @@ export default function ContactSupportPanel({
               {(() => {
                 const selectedTicket = tickets.find((ticket) => ticket.id === selectedTicketId) ?? tickets[0]
                 if (!selectedTicket) return <div className="flex min-h-80 items-center justify-center rounded-xl border border-stone-200 text-sm text-stone-500">No tickets found.</div>
-                return <div className="flex min-h-80 flex-col rounded-xl border border-stone-200 bg-white"><div className="border-b border-stone-200 p-5"><div className="flex flex-wrap items-center gap-2"><span className="text-xs font-bold text-stone-500">{selectedTicket.ticket_number}</span><span className="rounded-full bg-[#fbe3df] px-2.5 py-1 text-[11px] font-bold capitalize text-[#c23f32]">{selectedTicket.status}</span>{selectedTicket.order_number && <span className="rounded-full bg-[#f7f0e6] px-2.5 py-1 text-[11px] font-bold text-stone-600">Order #{selectedTicket.order_number}</span>}</div><div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><h3 className="text-lg font-black text-stone-900">{selectedTicket.subject}</h3><p className="text-sm text-stone-500 sm:text-right">Category: {selectedTicket.category}</p></div></div><div className="flex-1 space-y-4 p-5">{selectedTicket.messages.length > 0 ? selectedTicket.messages.map((message) => <div key={`${message.author}-${message.created_at}`} className={message.isCustomer ? 'ml-auto max-w-[90%]' : 'max-w-[90%]'}><div className={`mb-1 flex items-center gap-2 text-xs text-stone-500 ${message.isCustomer ? 'justify-end' : 'justify-start'}`}><span className="font-bold text-stone-700">{message.author}</span><span>·</span><span>{new Date(message.created_at).toLocaleString()}</span></div><div className={`rounded-2xl px-4 py-3 text-sm leading-6 ${message.isCustomer ? 'rounded-tr-sm bg-[#d9483a] text-white' : 'rounded-tl-sm bg-[#f7f0e6] text-stone-700'}`}>{message.body}</div></div>) : <p className="text-sm text-stone-500">No messages yet. Our team will reply soon.</p>}</div><div className="border-t border-stone-200 p-4"><div className="flex gap-2"><input disabled aria-label="Reply to support ticket" className="min-w-0 flex-1 rounded-xl border border-stone-200 bg-[#fcfaf7] px-4 py-3 text-sm text-stone-400" placeholder="Type a reply to Berry Co. support..." /><button type="button" disabled className="rounded-xl bg-[#d9483a] px-5 py-3 text-sm font-black text-white opacity-60">Reply</button></div><p className="mt-2 text-xs text-stone-400">Replies will be available when support messaging is connected.</p></div></div>
+                return <div className="flex min-h-80 flex-col rounded-xl border border-stone-200 bg-white"><div className="border-b border-stone-200 p-5"><div className="flex flex-wrap items-center gap-2"><span className="text-xs font-bold text-stone-500">{selectedTicket.ticket_number}</span><span className="rounded-full bg-[#fbe3df] px-2.5 py-1 text-[11px] font-bold capitalize text-[#c23f32]">{selectedTicket.status}</span>{selectedTicket.order_number && <span className="rounded-full bg-[#f7f0e6] px-2.5 py-1 text-[11px] font-bold text-stone-600">Order #{selectedTicket.order_number}</span>}</div><div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><h3 className="text-lg font-black text-stone-900">{selectedTicket.subject}</h3><p className="text-sm text-stone-500 sm:text-right">Category: {selectedTicket.category}</p></div></div><div className="flex-1 space-y-4 p-5">{selectedTicket.messages.length > 0 ? selectedTicket.messages.map((message) => <div key={`${message.author}-${message.created_at}`} className={message.isCustomer ? 'ml-auto max-w-[90%]' : 'max-w-[90%]'}><div className={`mb-1 flex items-center gap-2 text-xs text-stone-500 ${message.isCustomer ? 'justify-end' : 'justify-start'}`}><span className="font-bold text-stone-700">{message.author}</span><span>·</span><span>{new Date(message.created_at).toLocaleString()}</span></div><div className={`rounded-2xl px-4 py-3 text-sm leading-6 ${message.isCustomer ? 'rounded-tr-sm bg-[#d9483a] text-white' : 'rounded-tl-sm bg-[#f7f0e6] text-stone-700'}`}>{message.body}</div></div>) : <p className="text-sm text-stone-500">No messages yet. Our team will reply soon.</p>}</div><div className="border-t border-stone-200 p-4"><div className="flex gap-2"><input value={trackMessage} onChange={(event) => setTrackMessage(event.target.value)} aria-label="Reply to support ticket" className="min-w-0 flex-1 rounded-xl border border-stone-200 bg-[#fcfaf7] px-4 py-3 text-sm text-stone-700 outline-none focus:border-[#d9483a]" placeholder="Type a reply to Berry Co. support..." /><button type="button" onClick={() => { void handleTicketReply() }} className="rounded-xl bg-[#d9483a] px-5 py-3 text-sm font-black text-white hover:bg-[#b82a20]">Reply</button></div><p className="mt-2 text-xs text-stone-400">Replies will be available when support messaging is connected.</p></div></div>
               })()}
             </div>}
           </div>

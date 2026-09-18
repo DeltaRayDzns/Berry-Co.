@@ -108,8 +108,13 @@ export default function ProductBuyBox({
   };
 
   return (
-    <div className="rounded-4xl bg-[#F4ECE1] p-6 shadow-xs border border-dark/10 space-y-5">
-      
+    <div className="relative rounded-4xl bg-[#F4ECE1] p-6 shadow-xs border border-dark/10 space-y-5">
+      {isPreOrder && (
+        <div className="absolute -top-3 left-4 z-10 rounded-full bg-[#d94b3d] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-md">
+          Pre-Order Sale
+        </div>
+      )}
+
       {/* SKU & Product Title */}
       <div className="text-right">
         {sku && (
@@ -156,13 +161,17 @@ export default function ProductBuyBox({
           className={`w-full rounded-full border py-3 text-xs font-extrabold transition-all shadow-xs ${
             isOutOfStock
               ? "border-dark/10 bg-dark/10 text-dark/40 cursor-not-allowed"
-              : "border-dark/30 bg-cream text-dark hover:bg-dark hover:text-white active:scale-95 cursor-pointer"
+              : isPreOrder
+                ? "border-[#d94b3d] bg-[#d94b3d] text-white hover:bg-[#b93a2f] active:scale-95 cursor-pointer"
+                : "border-dark/30 bg-cream text-dark hover:bg-dark hover:text-white active:scale-95 cursor-pointer"
           }`}
         >
           {isOutOfStock
             ? "Out of Stock"
             : added
             ? "Added to Cart! ✓"
+            : isPreOrder
+            ? "Pre-Order Now"
             : "Add to Cart"}
         </button>
 

@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Users,
   BarChart3,
+  MessageSquareText,
 } from 'lucide-react'
 
 const links = [
@@ -17,6 +18,7 @@ const links = [
   { href: '/admin/inventory', label: 'Inventory', icon: Boxes },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/support', label: 'Support', icon: MessageSquareText },
   { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
 ]
 

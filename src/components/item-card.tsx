@@ -56,14 +56,21 @@ export default function ItemCard({ item, className = "" }: ItemCardProps) {
         {/* Tags Overlay */}
         {tags.length > 0 && (
           <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1.5 pointer-events-none">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-brand px-2.5 py-0.5 text-[10px] font-black text-white shadow-xs"
-              >
-                {tag}
-              </span>
-            ))}
+            {tags.map((tag) => {
+              const isPreOrderTag = tag.toLowerCase().includes('pre-order');
+              return (
+                <span
+                  key={tag}
+                  className={
+                    isPreOrderTag
+                      ? 'rounded-full bg-[#d94b3d] px-2.5 py-0.5 text-[10px] font-black tracking-wide text-white shadow-xs'
+                      : 'rounded-full bg-brand px-2.5 py-0.5 text-[10px] font-black text-white shadow-xs'
+                  }
+                >
+                  {isPreOrderTag ? 'Pre-Order' : tag}
+                </span>
+              );
+            })}
           </div>
         )}
 

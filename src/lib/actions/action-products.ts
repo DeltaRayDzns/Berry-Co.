@@ -16,6 +16,25 @@ function generateSku(name: string) {
   return `${base}-${suffix}`
 }
 
+function normalizeImageUrls(rawValue: FormDataEntryValue | null | undefined): string[] {
+  const text = String(rawValue ?? '').trim()
+  if (!text) return []
+
+  try {
+    const parsed = JSON.parse(text)
+    if (Array.isArray(parsed)) {
+      return parsed.map((entry) => String(entry).trim()).filter(Boolean)
+    }
+  } catch {
+    // Not JSON; fall back to newline/comma parsing below.
+  }
+
+  return text
+    .split(/[\r\n,]+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+}
+
 function parseProductDates(formData: FormData) {
   const preorderStartDate = String(formData.get('preorder_start_date') ?? '').trim()
   const preorderEndDate = String(formData.get('preorder_end_date') ?? '').trim()
@@ -116,10 +135,7 @@ export async function createProduct(
     description: String(formData.get('description') ?? '') || null,
     specifications: String(formData.get('specifications') ?? '').trim() || null,
     image_url: String(formData.get('image_url') ?? '') || null,
-    image_urls: String(formData.get('image_urls') ?? '')
-      .split(/\r?\n/)
-      .map((url) => url.trim())
-      .filter(Boolean),
+    image_urls: normalizeImageUrls(formData.get('image_urls')),
   }
 
   const { data, error } = await supabase.from('products').insert(payload).select('id').single()
@@ -178,10 +194,7 @@ export async function updateProduct(
     description: String(formData.get('description') ?? '') || null,
     specifications: String(formData.get('specifications') ?? '').trim() || null,
     image_url: String(formData.get('image_url') ?? '') || null,
-    image_urls: String(formData.get('image_urls') ?? '')
-      .split(/\r?\n/)
-      .map((url) => url.trim())
-      .filter(Boolean),
+    image_urls: normalizeImageUrls(formData.get('image_urls')),
     updated_at: new Date().toISOString(),
   }
 
