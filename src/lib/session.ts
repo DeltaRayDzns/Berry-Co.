@@ -23,6 +23,7 @@ const GUEST_CART_COOKIE = "deckdrop_guest_cart";
 
 export interface SessionPayload {
   userId: string;
+  email: string | null;
   role: "customer" | "staff" | "admin" | "super_admin";
 }
 
@@ -40,6 +41,7 @@ export async function getSession(): Promise<SessionPayload | null> {
 
   return {
     userId: user.id,
+    email: user.email ?? null,
     role: (profile?.role ?? "customer") as SessionPayload["role"],
   };
 }
