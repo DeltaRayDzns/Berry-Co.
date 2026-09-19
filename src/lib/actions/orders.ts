@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import type { OrderStatus } from '@/types/database'
+import type { OrderStatus, PaymentStatus } from '@/types/database'
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {
   const supabase = await createClient()
@@ -15,6 +15,21 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
 
   revalidatePath('/admin/orders')
   revalidatePath(`/admin/orders/${id}`)
+  return { error: null }
+}
+
+export async function updatePaymentStatus(id: string, paymentStatus: PaymentStatus) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('orders')
+    .update({ payment_status: paymentStatus, updated_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin/orders')
+  revalidatePath(`/admin/orders/${id}`)
+  revalidatePath('/orders')
   return { error: null }
 }
 

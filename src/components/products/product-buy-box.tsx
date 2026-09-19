@@ -9,6 +9,8 @@ type BuyBoxProps = {
   stock?: number;
   name: string;
   price: string;
+  originalPrice?: string;
+  salePercentage?: number | null;
   status: "In Stock" | "Pre-orders Open" | "Out of Stock" | "Sold Out" | string;
   tag: string;
   preorderPeriod?: string;
@@ -21,6 +23,8 @@ export default function ProductBuyBox({
   stock,
   name,
   price,
+  originalPrice,
+  salePercentage,
   status,
   tag,
   preorderPeriod,
@@ -99,6 +103,7 @@ export default function ProductBuyBox({
     status.toLowerCase().includes("sold out");
 
   const isPreOrder = status.toLowerCase().includes("pre-order");
+  const hasSale = Boolean(salePercentage && salePercentage > 0) && Boolean(originalPrice && originalPrice !== price);
 
   // Status Text Color Formatting
   const getStatusColor = () => {
@@ -127,7 +132,17 @@ export default function ProductBuyBox({
 
       {/* Price, Status & Stock */}
       <div className="text-right space-y-0.5">
-        <p className="text-2xl font-black text-dark">{price}</p>
+        {hasSale && originalPrice ? (
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-dark/45 line-through">{originalPrice}</p>
+            <p className="text-2xl font-black text-[#d94b3d]">{price}</p>
+            {salePercentage ? (
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d94b3d]">-{salePercentage}% OFF</p>
+            ) : null}
+          </div>
+        ) : (
+          <p className="text-2xl font-black text-dark">{price}</p>
+        )}
         <p className={`text-xs font-bold ${getStatusColor()}`}>
           {status}
         </p>

@@ -12,6 +12,7 @@ type CatalogProduct = {
   name: string;
   sku: string;
   price: number;
+  sale_percentage: number | null;
   image_url: string | null;
   description: string | null;
   short_description: string | null;
@@ -445,23 +446,33 @@ function ProductsContent() {
             <p className="py-12 text-center text-sm font-semibold text-dark/60">No products found.</p>
           )}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredProducts.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={{
-                  id: item.id,
-                  company: item.brand_name ?? "Berry Co.",
-                  name: item.name,
-                  description: item.description ?? undefined,
-                  shortDescription: item.short_description ?? undefined,
-                  price: `₱${Number(item.price).toLocaleString('en-PH')}`,
-                  imageUrl: item.image_url ?? undefined,
-                  category: item.category_name ?? undefined,
-                  status: item.status,
-                  tags: item.tags ?? [],
-                }}
-              />
-            ))}
+            {filteredProducts.map((item) => {
+              const basePrice = Number(item.price);
+              const salePercentage = Number(item.sale_percentage ?? 0);
+              const hasSale = (item.tags ?? []).some((tag) => String(tag).toLowerCase().includes('sale') || String(tag).toLowerCase().includes('discount')) && salePercentage > 0;
+              const salePrice = hasSale ? basePrice * (1 - salePercentage / 100) : basePrice;
+
+              return (
+                <ItemCard
+                  key={item.id}
+                  item={{
+                    id: item.id,
+                    company: item.brand_name ?? "Berry Co.",
+                    name: item.name,
+                    description: item.description ?? undefined,
+                    shortDescription: item.short_description ?? undefined,
+                    price: `₱${Number(basePrice).toLocaleString('en-PH')}`,
+                    originalPrice: hasSale ? `₱${Number(basePrice).toLocaleString('en-PH')}` : undefined,
+                    salePrice: hasSale ? `₱${Number(salePrice).toLocaleString('en-PH')}` : `₱${Number(basePrice).toLocaleString('en-PH')}`,
+                    salePercentage: hasSale ? salePercentage : null,
+                    imageUrl: item.image_url ?? undefined,
+                    category: item.category_name ?? undefined,
+                    status: item.status,
+                    tags: item.tags ?? [],
+                  }}
+                />
+              );
+            })}
           </div>
         </section>
 

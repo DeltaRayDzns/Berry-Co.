@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getOrderByIdForUser } from '@/lib/data/storefront'
 import CancelOrderButton from '@/components/storefront/cancel-order-button'
+import PaymentStatusBadge from '@/components/storefront/payment-status-badge'
 
 function formatPaymentStatus(status: string) {
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
@@ -68,7 +69,9 @@ export default async function OrderDetailPage({
             </div>
             <div className="rounded-[1.5rem] border border-dark/10 bg-paper p-4">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-dark/50">Payment status</p>
-              <p className="mt-2 text-xl font-black text-dark">{formatPaymentStatus(order.order.payment_status)}</p>
+              <div className="mt-3">
+                <PaymentStatusBadge status={order.order.payment_status} />
+              </div>
             </div>
           </div>
 

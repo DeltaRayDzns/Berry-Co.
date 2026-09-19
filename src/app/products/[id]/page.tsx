@@ -43,6 +43,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
     return start === end ? `${start}` : `${start} – ${end}`
   }
 
+  const basePrice = Number(product.price)
+  const salePercentage = Number(product.sale_percentage ?? 0)
+  const isSaleTagged = (product.tags ?? []).some((tag) => tag.toLowerCase().includes('sale') || tag.toLowerCase().includes('discount'))
+  const hasSale = isSaleTagged && salePercentage > 0
+  const salePrice = hasSale ? basePrice * (1 - salePercentage / 100) : basePrice
   const status = isPreOrderProduct ? 'Pre-orders Open' : product.status === 'out_of_stock' ? 'Out of Stock' : 'In Stock';
   const productDescription =
     product.description?.trim() ||
@@ -110,7 +115,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
               sku={product.sku}
               stock={product.stock}
               name={product.name}
-              price={`₱${Number(product.price).toLocaleString('en-PH')}`}
+              price={`₱${Number(salePrice).toLocaleString('en-PH')}`}
+              originalPrice={hasSale ? `₱${Number(basePrice).toLocaleString('en-PH')}` : undefined}
+              salePercentage={hasSale ? salePercentage : null}
               status={status}
               tag={isPreOrderProduct ? 'Pre-Order' : product.category_name ?? 'Berry Co.'}
               preorderPeriod={formatPreOrderPeriod()}

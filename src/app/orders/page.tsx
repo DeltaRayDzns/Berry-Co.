@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getOrdersForUser } from '@/lib/data/storefront'
+import PaymentStatusBadge from '@/components/storefront/payment-status-badge'
 
 export default async function OrdersPage({
   searchParams,
@@ -59,7 +60,7 @@ export default async function OrdersPage({
 
                   <div className="flex flex-wrap items-center gap-3 text-sm font-bold text-dark/70">
                     <span className="rounded-full bg-cream px-3 py-1">{order.status}</span>
-                    <span className="rounded-full bg-cream px-3 py-1">{order.payment_status}</span>
+                    <PaymentStatusBadge status={order.payment_status} />
                   </div>
 
                   <div className="text-right">

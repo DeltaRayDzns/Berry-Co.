@@ -7,6 +7,9 @@ export interface Item {
   description?: string;
   shortDescription?: string;
   price?: string | number;
+  originalPrice?: string | number;
+  salePrice?: string | number;
+  salePercentage?: number | null;
   imageUrl?: string;
   href?: string;
   tags?: string[];
@@ -26,6 +29,9 @@ export default function ItemCard({ item, className = "" }: ItemCardProps) {
     name = "Item Name",
     shortDescription,
     price = "₱0",
+    originalPrice,
+    salePrice,
+    salePercentage,
     imageUrl,
     href,
     tags = [],
@@ -33,6 +39,10 @@ export default function ItemCard({ item, className = "" }: ItemCardProps) {
   } = item;
 
   const safeName = name?.trim() || "Item Name";
+  const isSaleTagged = (tags ?? []).some((tag) => String(tag).toLowerCase().includes('sale') || String(tag).toLowerCase().includes('discount'));
+  const hasSale = isSaleTagged && (Boolean(salePercentage && salePercentage > 0) || Boolean(salePrice && salePrice !== price));
+  const displayPrice = hasSale ? (salePrice ?? price) : price;
+  const displayOriginalPrice = hasSale ? (originalPrice ?? null) : null;
   // Strictly checks shortDescription ONLY. If missing, renders nothing.
   const cardText = shortDescription?.trim();
   const targetHref = href ?? (id !== undefined ? `/products/${id}` : undefined);
@@ -57,17 +67,19 @@ export default function ItemCard({ item, className = "" }: ItemCardProps) {
         {tags.length > 0 && (
           <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1.5 pointer-events-none">
             {tags.map((tag) => {
-              const isPreOrderTag = tag.toLowerCase().includes('pre-order');
+              const normalizedTag = tag.toLowerCase();
+              const isPreOrderTag = normalizedTag.includes('pre-order');
+              const isSaleTag = normalizedTag.includes('sale') || normalizedTag.includes('discount');
               return (
                 <span
                   key={tag}
                   className={
-                    isPreOrderTag
+                    isSaleTag || isPreOrderTag
                       ? 'rounded-full bg-[#d94b3d] px-2.5 py-0.5 text-[10px] font-black tracking-wide text-white shadow-xs'
                       : 'rounded-full bg-brand px-2.5 py-0.5 text-[10px] font-black text-white shadow-xs'
                   }
                 >
-                  {isPreOrderTag ? 'Pre-Order' : tag}
+                  {isSaleTag ? 'Sale' : isPreOrderTag ? 'Pre-Order' : tag}
                 </span>
               );
             })}
@@ -102,7 +114,16 @@ export default function ItemCard({ item, className = "" }: ItemCardProps) {
         </div>
 
         {/* Bottom Content: Price pinned to bottom */}
-        <p className="mt-3 pt-1 text-sm font-extrabold text-brand">{price}</p>
+        <div className="mt-3 pt-1">
+          {hasSale && displayOriginalPrice ? (
+            <div className="space-y-1">
+              <p className="text-[11px] font-bold text-dark/45 line-through">{String(displayOriginalPrice)}</p>
+              <p className="text-sm font-extrabold text-[#d94b3d]">{String(displayPrice)}</p>
+            </div>
+          ) : (
+            <p className="text-sm font-extrabold text-brand">{String(displayPrice)}</p>
+          )}
+        </div>
       </div>
     </article>
   );

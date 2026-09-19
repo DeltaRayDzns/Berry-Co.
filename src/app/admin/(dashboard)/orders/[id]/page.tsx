@@ -5,6 +5,7 @@ import { getOrderById, getOrderRefunds } from '@/lib/data/orders'
 import OrderStatusBadge from '@/components/admin/orders/order-status-badge'
 import PaymentStatusBadge from '@/components/admin/orders/payment-status-badge'
 import StatusControl from '@/components/admin/orders/status-control'
+import PaymentStatusControl from '@/components/admin/orders/payment-status-control'
 import RefundPanel from '@/components/admin/orders/refund-panel'
 
 export default async function OrderDetailPage({
@@ -82,6 +83,7 @@ export default async function OrderDetailPage({
       </div>
 
       <StatusControl orderId={order.id} currentStatus={order.status} />
+      <PaymentStatusControl orderId={order.id} currentPaymentStatus={order.payment_status} />
 
       <RefundPanel
         orderId={order.id}
